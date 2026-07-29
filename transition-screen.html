@@ -53,6 +53,7 @@
     const TRANSITION_IMAGE = 'Frame%20225287.png';
     const GROUP_IMAGE = 'Group%20230792.png';
     const BAT_SHEET = 'bat.png';
+    const LIGHT_IMAGES = ['light-1', 'light-2'];
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
@@ -81,6 +82,8 @@
 
         this.load.image('transition-frame', TRANSITION_IMAGE);
         this.load.image('transition-group', GROUP_IMAGE);
+        this.load.image('light-1', 'light_1.png');
+        this.load.image('light-2', 'light_2.png');
         this.load.spritesheet('bat', BAT_SHEET, {
           frameWidth: BAT_FRAME.width,
           frameHeight: BAT_FRAME.height
@@ -120,6 +123,45 @@
         this.time.delayedCall(index * 180, () => this.moveBat(bat));
       }
 
+      spawnLightning() {
+        const textureKey = Phaser.Utils.Array.GetRandom(LIGHT_IMAGES);
+        const lightning = this.add.image(
+          Phaser.Math.Between(80, GAME_WIDTH - 80),
+          0,
+          textureKey
+        );
+
+        lightning
+          .setOrigin(0.5, 0)
+          .setDepth(20)
+          .setAlpha(0)
+          .setBlendMode(Phaser.BlendModes.ADD);
+
+        this.tweens.add({
+          targets: lightning,
+          alpha: 1,
+          duration: Phaser.Math.Between(35, 70),
+          yoyo: true,
+          hold: Phaser.Math.Between(35, 90),
+          ease: 'Quad.easeOut',
+          onComplete: () => lightning.destroy()
+        });
+      }
+
+      scheduleLightning() {
+        this.time.delayedCall(Phaser.Math.Between(550, 1800), () => {
+          const flashes = Phaser.Math.Between(1, 2);
+
+          for (let index = 0; index < flashes; index += 1) {
+            this.time.delayedCall(index * Phaser.Math.Between(70, 130), () => {
+              this.spawnLightning();
+            });
+          }
+
+          this.scheduleLightning();
+        });
+      }
+
       create() {
         this.cameras.main.setBackgroundColor('#090909');
 
@@ -137,6 +179,8 @@
         for (let index = 0; index < BAT_COUNT; index += 1) {
           this.addBat(index);
         }
+
+        this.scheduleLightning();
       }
     }
 
