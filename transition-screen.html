@@ -90,26 +90,26 @@
   <div id="rainControls">
     <div class="sliderRow">
       <label for="rainImageAngle">Image angle</label>
-      <input id="rainImageAngle" type="range" min="-180" max="180" step="1" value="-150">
+      <input id="rainImageAngle" type="range" min="-180" max="180" step="1" value="-30">
       <span id="rainImageAngleValue">-150°</span>
     </div>
     <div class="sliderRow">
       <label for="rainFallSpeed">Fall speed</label>
-      <input id="rainFallSpeed" type="range" min="600" max="3200" step="50" value="1850">
+      <input id="rainFallSpeed" type="range" min="600" max="3200" step="50" value="1400">
       <span id="rainFallSpeedValue">1850</span>
     </div>
     <div class="sliderRow">
       <label for="rainFallAngle">Fall angle</label>
-      <input id="rainFallAngle" type="range" min="-45" max="45" step="1" value="8">
+      <input id="rainFallAngle" type="range" min="-45" max="45" step="1" value="24">
       <span id="rainFallAngleValue">8°</span>
     </div>
     <div class="sliderRow">
       <label for="rainSpacing">Spacing</label>
-      <input id="rainSpacing" type="range" min="70" max="260" step="5" value="160">
+      <input id="rainSpacing" type="range" min="70" max="260" step="5" value="170">
       <span id="rainSpacingValue">160</span>
     </div>
   </div>
-  <div id="version">v2.5</div>
+  <div id="version">v2.6</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -136,11 +136,12 @@
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 34;
     const RAIN_SETTINGS = {
-      imageAngle: -150,
-      fallSpeed: 1850,
-      fallAngle: 8,
-      spacing: 160,
-      lastSpacing: 160
+      imageAngle: -30,
+      fallSpeed: 1400,
+      fallAngle: 24,
+      spacing: 170,
+      lastSpacing: 170,
+      alpha: 0.4
     };
     const RAIN_MARGIN = 260;
     const status = document.getElementById('status');
@@ -313,7 +314,7 @@
             rain
               .setDepth(30)
               .setAngle(RAIN_SETTINGS.imageAngle)
-              .setAlpha(0.9);
+              .setAlpha(RAIN_SETTINGS.alpha);
 
             this.rainDrops.push(rain);
           }
@@ -327,6 +328,7 @@
 
         this.rainDrops.forEach((rain) => {
           rain.setAngle(RAIN_SETTINGS.imageAngle);
+          rain.setAlpha(RAIN_SETTINGS.alpha);
         });
 
         if (RAIN_SETTINGS.spacing !== RAIN_SETTINGS.lastSpacing) {
