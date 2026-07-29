@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v3.1</div>
+  <div id="version">v3.2</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -66,6 +66,7 @@
     const GROUP_IMAGE = 'Group%20230792.png';
     const BAT_SHEET = 'bat.png';
     const RAIN_IMAGE = 'rain.png';
+    const LIGHT_FLASH_IMAGE = 'Rectangle.png';
     const LIGHT_IMAGES = ['light-1', 'light-2'];
     const LIGHT_SCALE = 0.65;
     const WAVE_IMAGES = ['wave-1', 'wave-2', 'wave-3', 'wave-4', 'wave-5'];
@@ -115,6 +116,7 @@
         this.load.image('transition-frame', TRANSITION_IMAGE);
         this.load.image('transition-group', GROUP_IMAGE);
         this.load.image('rain', RAIN_IMAGE);
+        this.load.image('light-flash', LIGHT_FLASH_IMAGE);
         this.load.image('light-1', 'light_1.png');
         this.load.image('light-2', 'light_2.png');
         this.load.image('wave-1', 'wave_1.png');
@@ -184,6 +186,22 @@
           hold: Phaser.Math.Between(35, 90),
           ease: 'Quad.easeOut',
           onComplete: () => lightning.destroy()
+        });
+
+        this.flashLightningOverlay();
+      }
+
+      flashLightningOverlay() {
+        this.tweens.killTweensOf(this.lightningFlash);
+        this.lightningFlash.setAlpha(0);
+
+        this.tweens.add({
+          targets: this.lightningFlash,
+          alpha: 0.85,
+          duration: 35,
+          yoyo: true,
+          hold: 28,
+          ease: 'Quad.easeOut'
         });
       }
 
@@ -379,6 +397,11 @@
         this.activeWaves = [];
 
         this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'transition-frame');
+
+        this.lightningFlash = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'light-flash')
+          .setDepth(25)
+          .setAlpha(0)
+          .setBlendMode(Phaser.BlendModes.ADD);
 
         this.anims.create({
           key: 'bat-flap',
