@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v3.0</div>
+  <div id="version">v3.1</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -313,7 +313,7 @@
           : WAVE_IMAGES.filter((textureKey) => textureKey !== 'wave-1');
         const textureKey = Phaser.Utils.Array.GetRandom(availableWaves);
         const perspectiveScale = Phaser.Math.Linear(
-          0.42,
+          0.28,
           1,
           perspectiveProgress
         );
