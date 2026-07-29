@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v2.0</div>
+  <div id="version">v2.1</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -79,7 +79,7 @@
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
-    const GROUP_FLOAT_X = 14;
+    const GROUP_FLOAT_X = 34;
     const status = document.getElementById('status');
 
     function showStatus(message) {
@@ -301,7 +301,7 @@
         this.tweens.add({
           targets: group,
           x: GROUP_POSITION.x + GROUP_FLOAT_X,
-          duration: 2600,
+          duration: 1800,
           ease: 'Sine.easeInOut',
           yoyo: true,
           repeat: -1
