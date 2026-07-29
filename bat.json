@@ -1,0 +1,82 @@
+{
+	"textures": [
+		{
+			"image": "texture",
+			"format": "RGBA8888",
+			"size": {
+				"w": 582,
+				"h": 136
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "32x32-bat-sprite 6.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 194,
+						"h": 136
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 194,
+						"h": 136
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 194,
+						"h": 136
+					}
+				},
+				{
+					"filename": "32x32-bat-sprite 7.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 194,
+						"h": 136
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 194,
+						"h": 136
+					},
+					"frame": {
+						"x": 194,
+						"y": 0,
+						"w": 194,
+						"h": 136
+					}
+				},
+				{
+					"filename": "32x32-bat-sprite 8.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 194,
+						"h": 136
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 194,
+						"h": 136
+					},
+					"frame": {
+						"x": 388,
+						"y": 0,
+						"w": 194,
+						"h": 136
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "http://free-tex-packer.com",
+		"version": "0.6.7"
+	}
+}
