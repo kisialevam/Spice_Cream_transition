@@ -36,8 +36,8 @@
   <script>
     const GAME_WIDTH = 1080;
     const GAME_HEIGHT = 2048;
-    const TRANSITION_IMAGE =
-      'file:///D:/Work/spice%20cream/spice_cream_transition/Frame%20225287.png';
+    const TRANSITION_IMAGE = 'Frame 225287.png';
+    const GROUP_IMAGE = 'Group 230792.png';
 
     class TransitionScene extends Phaser.Scene {
       constructor() {
@@ -46,14 +46,16 @@
 
       preload() {
         this.load.image('transition-frame', TRANSITION_IMAGE);
+        this.load.image('transition-group', GROUP_IMAGE);
       }
 
       create() {
         this.cameras.main.setBackgroundColor('#090909');
 
-        const image = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'transition-frame');
-        const coverScale = Math.max(GAME_WIDTH / image.width, GAME_HEIGHT / image.height);
-        image.setScale(coverScale);
+        this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'transition-frame');
+
+        const group = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'transition-group');
+        group.setScale(GAME_WIDTH / group.width);
       }
     }
 
