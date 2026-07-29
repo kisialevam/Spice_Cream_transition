@@ -28,6 +28,17 @@
       display: block;
     }
 
+    #version {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      z-index: 3;
+      color: rgba(255, 255, 255, 0.58);
+      font: 12px Arial, sans-serif;
+      pointer-events: none;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+    }
+
     #status {
       position: fixed;
       inset: 0;
@@ -44,6 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
+  <div id="version">v0.4</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -54,7 +66,7 @@
     const GROUP_IMAGE = 'Group%20230792.png';
     const BAT_SHEET = 'bat.png';
     const LIGHT_IMAGES = ['light-1', 'light-2'];
-    const LIGHT_SCALE = 0.5;
+    const LIGHT_SCALE = 0.65;
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
@@ -151,11 +163,11 @@
       }
 
       scheduleLightning() {
-        this.time.delayedCall(Phaser.Math.Between(1100, 3600), () => {
-          const flashes = Phaser.Math.Between(1, 2);
+        this.time.delayedCall(Phaser.Math.Between(1600, 6200), () => {
+          const flashes = Phaser.Math.Between(1, 100) <= 18 ? 2 : 1;
 
           for (let index = 0; index < flashes; index += 1) {
-            this.time.delayedCall(index * Phaser.Math.Between(70, 130), () => {
+            this.time.delayedCall(index * Phaser.Math.Between(180, 520), () => {
               this.spawnLightning();
             });
           }
