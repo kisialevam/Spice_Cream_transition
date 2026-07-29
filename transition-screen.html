@@ -28,38 +28,6 @@
       display: block;
     }
 
-    #rainControls {
-      position: fixed;
-      left: 12px;
-      top: 12px;
-      z-index: 4;
-      width: min(360px, calc(100vw - 24px));
-      padding: 12px;
-      box-sizing: border-box;
-      color: #ffffff;
-      background: rgba(9, 9, 9, 0.74);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 8px;
-      font: 13px Arial, sans-serif;
-      backdrop-filter: blur(8px);
-    }
-
-    .sliderRow {
-      display: grid;
-      grid-template-columns: 112px 1fr 58px;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .sliderRow:last-child {
-      margin-bottom: 0;
-    }
-
-    .sliderRow input {
-      width: 100%;
-    }
-
     #version {
       position: fixed;
       right: 10px;
@@ -87,29 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="rainControls">
-    <div class="sliderRow">
-      <label for="rainImageAngle">Image angle</label>
-      <input id="rainImageAngle" type="range" min="-180" max="180" step="1" value="-30">
-      <span id="rainImageAngleValue">-150°</span>
-    </div>
-    <div class="sliderRow">
-      <label for="rainFallSpeed">Fall speed</label>
-      <input id="rainFallSpeed" type="range" min="600" max="3200" step="50" value="1400">
-      <span id="rainFallSpeedValue">1850</span>
-    </div>
-    <div class="sliderRow">
-      <label for="rainFallAngle">Fall angle</label>
-      <input id="rainFallAngle" type="range" min="-45" max="45" step="1" value="24">
-      <span id="rainFallAngleValue">8°</span>
-    </div>
-    <div class="sliderRow">
-      <label for="rainSpacing">Spacing</label>
-      <input id="rainSpacing" type="range" min="70" max="260" step="5" value="170">
-      <span id="rainSpacingValue">160</span>
-    </div>
-  </div>
-  <div id="version">v2.8</div>
+  <div id="version">v2.9</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -137,53 +83,19 @@
     const GROUP_FLOAT_X = 34;
     const RAIN_SETTINGS = {
       imageAngle: -30,
-      fallSpeed: 1400,
+      fallSpeed: 2200,
       fallAngle: 24,
-      spacing: 170,
-      lastSpacing: 170,
+      spacing: 155,
+      lastSpacing: 155,
       alpha: 0.4
     };
     const RAIN_MARGIN = 260;
     const status = document.getElementById('status');
-    const rainControls = {
-      imageAngle: document.getElementById('rainImageAngle'),
-      fallSpeed: document.getElementById('rainFallSpeed'),
-      fallAngle: document.getElementById('rainFallAngle'),
-      spacing: document.getElementById('rainSpacing'),
-      imageAngleValue: document.getElementById('rainImageAngleValue'),
-      fallSpeedValue: document.getElementById('rainFallSpeedValue'),
-      fallAngleValue: document.getElementById('rainFallAngleValue'),
-      spacingValue: document.getElementById('rainSpacingValue')
-    };
 
     function showStatus(message) {
       status.textContent = message;
       status.style.display = 'grid';
     }
-
-    function updateRainSettings() {
-      RAIN_SETTINGS.imageAngle = Number(rainControls.imageAngle.value);
-      RAIN_SETTINGS.fallSpeed = Number(rainControls.fallSpeed.value);
-      RAIN_SETTINGS.fallAngle = Number(rainControls.fallAngle.value);
-      RAIN_SETTINGS.spacing = Number(rainControls.spacing.value);
-
-      rainControls.imageAngleValue.textContent = `${RAIN_SETTINGS.imageAngle}°`;
-      rainControls.fallSpeedValue.textContent = String(RAIN_SETTINGS.fallSpeed);
-      rainControls.fallAngleValue.textContent = `${RAIN_SETTINGS.fallAngle}°`;
-      rainControls.spacingValue.textContent = String(RAIN_SETTINGS.spacing);
-
-      if (window.transitionScene) {
-        window.transitionScene.applyRainSettings();
-      }
-    }
-
-    Object.values(rainControls).forEach((control) => {
-      if (control.tagName === 'INPUT') {
-        control.addEventListener('input', updateRainSettings);
-      }
-    });
-
-    updateRainSettings();
 
     if (!window.Phaser) {
       showStatus('Phaser did not load. Check your internet connection or CDN access.');
