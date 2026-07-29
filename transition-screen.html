@@ -28,38 +28,6 @@
       display: block;
     }
 
-    #waveControls {
-      position: fixed;
-      left: 12px;
-      top: 12px;
-      z-index: 4;
-      width: min(340px, calc(100vw - 24px));
-      padding: 12px;
-      box-sizing: border-box;
-      color: #ffffff;
-      background: rgba(9, 9, 9, 0.74);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 8px;
-      font: 13px Arial, sans-serif;
-      backdrop-filter: blur(8px);
-    }
-
-    .sliderRow {
-      display: grid;
-      grid-template-columns: 92px 1fr 44px;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .sliderRow:last-child {
-      margin-bottom: 0;
-    }
-
-    .sliderRow input {
-      width: 100%;
-    }
-
     #version {
       position: fixed;
       right: 10px;
@@ -87,29 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="waveControls">
-    <div class="sliderRow">
-      <label for="waveMoveSpeed">Move</label>
-      <input id="waveMoveSpeed" type="range" min="0.4" max="2.4" step="0.1" value="1">
-      <span id="waveMoveSpeedValue">1.0x</span>
-    </div>
-    <div class="sliderRow">
-      <label for="waveGrowSpeed">Grow</label>
-      <input id="waveGrowSpeed" type="range" min="0.4" max="2.4" step="0.1" value="1">
-      <span id="waveGrowSpeedValue">1.0x</span>
-    </div>
-    <div class="sliderRow">
-      <label for="waveCount">Count</label>
-      <input id="waveCount" type="range" min="1" max="12" step="1" value="5">
-      <span id="waveCountValue">5</span>
-    </div>
-    <div class="sliderRow">
-      <label for="waveShrinkSpeed">Shrink</label>
-      <input id="waveShrinkSpeed" type="range" min="0.4" max="2.4" step="0.1" value="1">
-      <span id="waveShrinkSpeedValue">1.0x</span>
-    </div>
-  </div>
-  <div id="version">v1.0</div>
+  <div id="version">v1.1</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -122,57 +68,24 @@
     const LIGHT_IMAGES = ['light-1', 'light-2'];
     const LIGHT_SCALE = 0.65;
     const WAVE_IMAGES = ['wave-1', 'wave-2', 'wave-3', 'wave-4', 'wave-5'];
+    const WAVE_SETTINGS = {
+      moveSpeed: 1,
+      growSpeed: 1.4,
+      maxActive: 12,
+      shrinkSpeed: 1.5
+    };
     const WAVE_MIN_DISTANCE_Y = 120;
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
+    const GROUP_FLOAT_Y = 14;
     const status = document.getElementById('status');
-    const waveSettings = {
-      moveSpeed: 1,
-      growSpeed: 1,
-      maxActive: 5,
-      shrinkSpeed: 1
-    };
-    const waveControls = {
-      move: document.getElementById('waveMoveSpeed'),
-      grow: document.getElementById('waveGrowSpeed'),
-      count: document.getElementById('waveCount'),
-      shrink: document.getElementById('waveShrinkSpeed'),
-      moveValue: document.getElementById('waveMoveSpeedValue'),
-      growValue: document.getElementById('waveGrowSpeedValue'),
-      countValue: document.getElementById('waveCountValue'),
-      shrinkValue: document.getElementById('waveShrinkSpeedValue')
-    };
 
     function showStatus(message) {
       status.textContent = message;
       status.style.display = 'grid';
     }
-
-    function formatSpeed(value) {
-      return `${Number(value).toFixed(1)}x`;
-    }
-
-    function updateWaveSettings() {
-      waveSettings.moveSpeed = Number(waveControls.move.value);
-      waveSettings.growSpeed = Number(waveControls.grow.value);
-      waveSettings.maxActive = Number(waveControls.count.value);
-      waveSettings.shrinkSpeed = Number(waveControls.shrink.value);
-
-      waveControls.moveValue.textContent = formatSpeed(waveSettings.moveSpeed);
-      waveControls.growValue.textContent = formatSpeed(waveSettings.growSpeed);
-      waveControls.countValue.textContent = String(waveSettings.maxActive);
-      waveControls.shrinkValue.textContent = formatSpeed(waveSettings.shrinkSpeed);
-    }
-
-    Object.values(waveControls).forEach((control) => {
-      if (control.tagName === 'INPUT') {
-        control.addEventListener('input', updateWaveSettings);
-      }
-    });
-
-    updateWaveSettings();
 
     if (!window.Phaser) {
       showStatus('Phaser did not load. Check your internet connection or CDN access.');
@@ -293,14 +206,14 @@
       }
 
       spawnWave() {
-        if (this.activeWaves.length >= waveSettings.maxActive) {
+        if (this.activeWaves.length >= WAVE_SETTINGS.maxActive) {
           return;
         }
 
         const textureKey = Phaser.Utils.Array.GetRandom(WAVE_IMAGES);
         const direction = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
         const startX = Phaser.Math.Between(430, 650);
-        const driftDistance = Phaser.Math.Between(110, 280) * waveSettings.moveSpeed;
+        const driftDistance = Phaser.Math.Between(150, 360) * WAVE_SETTINGS.moveSpeed;
         const endX = startX + direction * driftDistance;
         const startY = this.getWaveSpawnY();
         const wave = this.add.image(startX, startY, textureKey);
@@ -313,9 +226,10 @@
 
         this.activeWaves.push(wave);
 
-        const growDuration = Phaser.Math.Between(260, 480) / waveSettings.growSpeed;
-        const shrinkDuration = Phaser.Math.Between(340, 680) / waveSettings.shrinkSpeed;
-        const driftDuration = growDuration + shrinkDuration;
+        const growDuration = Phaser.Math.Between(260, 480) / WAVE_SETTINGS.growSpeed;
+        const shrinkDuration = Phaser.Math.Between(340, 680) / WAVE_SETTINGS.shrinkSpeed;
+        const driftDuration = (growDuration + shrinkDuration) * Phaser.Math.FloatBetween(1.4, 2.2);
+        const visibleDuration = driftDuration - shrinkDuration;
 
         this.tweens.add({
           targets: wave,
@@ -331,22 +245,24 @@
           duration: growDuration,
           ease: 'Cubic.easeOut',
           onComplete: () => {
-            this.tweens.add({
-              targets: wave,
-              scaleY: 0,
-              duration: shrinkDuration,
-              ease: 'Cubic.easeIn',
-              onComplete: () => {
-                this.activeWaves = this.activeWaves.filter((item) => item !== wave);
-                wave.destroy();
-              }
+            this.time.delayedCall(Math.max(0, visibleDuration - growDuration), () => {
+              this.tweens.add({
+                targets: wave,
+                scaleY: 0,
+                duration: shrinkDuration,
+                ease: 'Cubic.easeIn',
+                onComplete: () => {
+                  this.activeWaves = this.activeWaves.filter((item) => item !== wave);
+                  wave.destroy();
+                }
+              });
             });
           }
         });
       }
 
       scheduleWaveSpawn() {
-        this.time.delayedCall(Phaser.Math.Between(260, 1050), () => {
+        this.time.delayedCall(Phaser.Math.Between(120, 430), () => {
           this.spawnWave();
           this.scheduleWaveSpawn();
         });
@@ -365,8 +281,17 @@
           repeat: -1
         });
 
-        this.add.image(GROUP_POSITION.x, GROUP_POSITION.y, 'transition-group')
+        const group = this.add.image(GROUP_POSITION.x, GROUP_POSITION.y, 'transition-group')
           .setDepth(5);
+
+        this.tweens.add({
+          targets: group,
+          y: GROUP_POSITION.y + GROUP_FLOAT_Y,
+          duration: 2600,
+          ease: 'Sine.easeInOut',
+          yoyo: true,
+          repeat: -1
+        });
 
         this.scheduleWaveSpawn();
 
