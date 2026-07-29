@@ -109,7 +109,7 @@
       <span id="rainSpacingValue">160</span>
     </div>
   </div>
-  <div id="version">v2.7</div>
+  <div id="version">v2.8</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -305,9 +305,10 @@
 
         for (let row = 0; row < rows; row += 1) {
           for (let column = 0; column < columns; column += 1) {
+            const zigzagOffsetY = column % 2 === 0 ? 0 : spacingY / 2;
             const rain = this.add.image(
               -RAIN_MARGIN + column * spacingX,
-              -RAIN_MARGIN + row * spacingY,
+              -RAIN_MARGIN + row * spacingY + zigzagOffsetY,
               'rain'
             );
 
