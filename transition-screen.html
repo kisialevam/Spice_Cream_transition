@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v1.2</div>
+  <div id="version">v1.3</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -70,16 +70,16 @@
     const WAVE_IMAGES = ['wave-1', 'wave-2', 'wave-3', 'wave-4', 'wave-5'];
     const WAVE_SETTINGS = {
       moveSpeed: 1,
-      growSpeed: 1.4,
+      growSpeed: 1.05,
       maxActive: 12,
-      shrinkSpeed: 1.5
+      shrinkSpeed: 1.15
     };
     const WAVE_MIN_DISTANCE_Y = 120;
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
-    const GROUP_FLOAT_Y = 14;
+    const GROUP_FLOAT_X = 14;
     const status = document.getElementById('status');
 
     function showStatus(message) {
@@ -286,7 +286,7 @@
 
         this.tweens.add({
           targets: group,
-          y: GROUP_POSITION.y + GROUP_FLOAT_Y,
+          x: GROUP_POSITION.x + GROUP_FLOAT_X,
           duration: 2600,
           ease: 'Sine.easeInOut',
           yoyo: true,
