@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v1.6</div>
+  <div id="version">v1.7</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -192,7 +192,7 @@
 
       getWaveSpawnY() {
         for (let attempt = 0; attempt < 16; attempt += 1) {
-          const y = Phaser.Math.Between(1060, 1900);
+          const y = Phaser.Math.Between(960, 1840);
           const hasEnoughSpace = this.activeWaves.every((wave) => {
             return Math.abs(wave.y - y) >= WAVE_MIN_DISTANCE_Y;
           });
@@ -202,7 +202,7 @@
           }
         }
 
-        return Phaser.Math.Between(1060, 1900);
+        return Phaser.Math.Between(960, 1840);
       }
 
       spawnWave() {
@@ -218,6 +218,11 @@
           Phaser.Math.Between(150, 360) * WAVE_SETTINGS.moveSpeed * driftSpeedVariant;
         const endX = startX + direction * driftDistance;
         const startY = this.getWaveSpawnY();
+        const perspectiveScale = Phaser.Math.Linear(
+          0.58,
+          1,
+          Phaser.Math.Clamp((startY - 960) / (1840 - 960), 0, 1)
+        );
         const wave = this.add.image(startX, startY, textureKey);
 
         wave
@@ -225,7 +230,7 @@
           .setDepth(6 + startY / GAME_HEIGHT)
           .setAlpha(1)
           .setBlendMode(Phaser.BlendModes.NORMAL)
-          .setScale(1, 0);
+          .setScale(perspectiveScale, 0);
 
         this.activeWaves.push(wave);
 
