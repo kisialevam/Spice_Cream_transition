@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v2.2</div>
+  <div id="version">v2.4</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -65,6 +65,7 @@
     const TRANSITION_IMAGE = 'Frame%20225287.png';
     const GROUP_IMAGE = 'Group%20230792.png';
     const BAT_SHEET = 'bat.png';
+    const RAIN_IMAGE = 'rain.png';
     const LIGHT_IMAGES = ['light-1', 'light-2'];
     const LIGHT_SCALE = 0.65;
     const WAVE_IMAGES = ['wave-1', 'wave-2', 'wave-3', 'wave-4', 'wave-5'];
@@ -80,6 +81,12 @@
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 34;
+    const RAIN_ANGLE = -150;
+    const RAIN_SPEED_Y = 1850;
+    const RAIN_SPEED_X = 260;
+    const RAIN_SPACING_X = 150;
+    const RAIN_SPACING_Y = 170;
+    const RAIN_MARGIN = 260;
     const status = document.getElementById('status');
 
     function showStatus(message) {
@@ -104,6 +111,7 @@
 
         this.load.image('transition-frame', TRANSITION_IMAGE);
         this.load.image('transition-group', GROUP_IMAGE);
+        this.load.image('rain', RAIN_IMAGE);
         this.load.image('light-1', 'light_1.png');
         this.load.image('light-2', 'light_2.png');
         this.load.image('wave-1', 'wave_1.png');
@@ -187,6 +195,53 @@
           }
 
           this.scheduleLightning();
+        });
+      }
+
+      addRain() {
+        const rows = Math.ceil((GAME_HEIGHT + RAIN_MARGIN * 2) / RAIN_SPACING_Y) + 1;
+        const columns = Math.ceil((GAME_WIDTH + RAIN_MARGIN * 2) / RAIN_SPACING_X) + 2;
+
+        this.rainDrops = [];
+        this.rainLoopHeight = rows * RAIN_SPACING_Y;
+        this.rainLoopWidth = columns * RAIN_SPACING_X;
+        this.rainLoopDrift = this.rainLoopHeight * (RAIN_SPEED_X / RAIN_SPEED_Y);
+
+        for (let row = 0; row < rows; row += 1) {
+          for (let column = 0; column < columns; column += 1) {
+            const rain = this.add.image(
+              -RAIN_MARGIN + column * RAIN_SPACING_X,
+              -RAIN_MARGIN + row * RAIN_SPACING_Y,
+              'rain'
+            );
+
+            rain
+              .setDepth(30)
+              .setAngle(RAIN_ANGLE)
+              .setAlpha(0.9);
+
+            this.rainDrops.push(rain);
+          }
+        }
+      }
+
+      updateRain(delta) {
+        const seconds = delta / 1000;
+        const moveX = RAIN_SPEED_X * seconds;
+        const moveY = RAIN_SPEED_Y * seconds;
+
+        this.rainDrops.forEach((rain) => {
+          rain.x += moveX;
+          rain.y += moveY;
+
+          if (rain.y > GAME_HEIGHT + RAIN_MARGIN) {
+            rain.y -= this.rainLoopHeight;
+            rain.x -= this.rainLoopDrift;
+          }
+
+          if (rain.x > GAME_WIDTH + RAIN_MARGIN) {
+            rain.x -= this.rainLoopWidth;
+          }
         });
       }
 
@@ -318,7 +373,12 @@
           this.addBat(index);
         }
 
+        this.addRain();
         this.scheduleLightning();
+      }
+
+      update(time, delta) {
+        this.updateRain(delta);
       }
     }
 
