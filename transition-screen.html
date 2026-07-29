@@ -54,6 +54,7 @@
     const GROUP_IMAGE = 'Group%20230792.png';
     const BAT_SHEET = 'bat.png';
     const LIGHT_IMAGES = ['light-1', 'light-2'];
+    const LIGHT_SCALE = 0.5;
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
@@ -134,6 +135,7 @@
         lightning
           .setOrigin(0.5, 0)
           .setDepth(20)
+          .setScale(LIGHT_SCALE)
           .setAlpha(0)
           .setBlendMode(Phaser.BlendModes.ADD);
 
@@ -149,7 +151,7 @@
       }
 
       scheduleLightning() {
-        this.time.delayedCall(Phaser.Math.Between(550, 1800), () => {
+        this.time.delayedCall(Phaser.Math.Between(1100, 3600), () => {
           const flashes = Phaser.Math.Between(1, 2);
 
           for (let index = 0; index < flashes; index += 1) {
