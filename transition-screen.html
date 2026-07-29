@@ -28,6 +28,38 @@
       display: block;
     }
 
+    #rainControls {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      z-index: 4;
+      width: min(360px, calc(100vw - 24px));
+      padding: 12px;
+      box-sizing: border-box;
+      color: #ffffff;
+      background: rgba(9, 9, 9, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      font: 13px Arial, sans-serif;
+      backdrop-filter: blur(8px);
+    }
+
+    .sliderRow {
+      display: grid;
+      grid-template-columns: 112px 1fr 58px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .sliderRow:last-child {
+      margin-bottom: 0;
+    }
+
+    .sliderRow input {
+      width: 100%;
+    }
+
     #version {
       position: fixed;
       right: 10px;
@@ -55,7 +87,29 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v2.4</div>
+  <div id="rainControls">
+    <div class="sliderRow">
+      <label for="rainImageAngle">Image angle</label>
+      <input id="rainImageAngle" type="range" min="-180" max="180" step="1" value="-150">
+      <span id="rainImageAngleValue">-150°</span>
+    </div>
+    <div class="sliderRow">
+      <label for="rainFallSpeed">Fall speed</label>
+      <input id="rainFallSpeed" type="range" min="600" max="3200" step="50" value="1850">
+      <span id="rainFallSpeedValue">1850</span>
+    </div>
+    <div class="sliderRow">
+      <label for="rainFallAngle">Fall angle</label>
+      <input id="rainFallAngle" type="range" min="-45" max="45" step="1" value="8">
+      <span id="rainFallAngleValue">8°</span>
+    </div>
+    <div class="sliderRow">
+      <label for="rainSpacing">Spacing</label>
+      <input id="rainSpacing" type="range" min="70" max="260" step="5" value="160">
+      <span id="rainSpacingValue">160</span>
+    </div>
+  </div>
+  <div id="version">v2.5</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -81,18 +135,54 @@
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 34;
-    const RAIN_ANGLE = -150;
-    const RAIN_SPEED_Y = 1850;
-    const RAIN_SPEED_X = 260;
-    const RAIN_SPACING_X = 150;
-    const RAIN_SPACING_Y = 170;
+    const RAIN_SETTINGS = {
+      imageAngle: -150,
+      fallSpeed: 1850,
+      fallAngle: 8,
+      spacing: 160,
+      lastSpacing: 160
+    };
     const RAIN_MARGIN = 260;
     const status = document.getElementById('status');
+    const rainControls = {
+      imageAngle: document.getElementById('rainImageAngle'),
+      fallSpeed: document.getElementById('rainFallSpeed'),
+      fallAngle: document.getElementById('rainFallAngle'),
+      spacing: document.getElementById('rainSpacing'),
+      imageAngleValue: document.getElementById('rainImageAngleValue'),
+      fallSpeedValue: document.getElementById('rainFallSpeedValue'),
+      fallAngleValue: document.getElementById('rainFallAngleValue'),
+      spacingValue: document.getElementById('rainSpacingValue')
+    };
 
     function showStatus(message) {
       status.textContent = message;
       status.style.display = 'grid';
     }
+
+    function updateRainSettings() {
+      RAIN_SETTINGS.imageAngle = Number(rainControls.imageAngle.value);
+      RAIN_SETTINGS.fallSpeed = Number(rainControls.fallSpeed.value);
+      RAIN_SETTINGS.fallAngle = Number(rainControls.fallAngle.value);
+      RAIN_SETTINGS.spacing = Number(rainControls.spacing.value);
+
+      rainControls.imageAngleValue.textContent = `${RAIN_SETTINGS.imageAngle}°`;
+      rainControls.fallSpeedValue.textContent = String(RAIN_SETTINGS.fallSpeed);
+      rainControls.fallAngleValue.textContent = `${RAIN_SETTINGS.fallAngle}°`;
+      rainControls.spacingValue.textContent = String(RAIN_SETTINGS.spacing);
+
+      if (window.transitionScene) {
+        window.transitionScene.applyRainSettings();
+      }
+    }
+
+    Object.values(rainControls).forEach((control) => {
+      if (control.tagName === 'INPUT') {
+        control.addEventListener('input', updateRainSettings);
+      }
+    });
+
+    updateRainSettings();
 
     if (!window.Phaser) {
       showStatus('Phaser did not load. Check your internet connection or CDN access.');
@@ -199,25 +289,30 @@
       }
 
       addRain() {
-        const rows = Math.ceil((GAME_HEIGHT + RAIN_MARGIN * 2) / RAIN_SPACING_Y) + 1;
-        const columns = Math.ceil((GAME_WIDTH + RAIN_MARGIN * 2) / RAIN_SPACING_X) + 2;
+        if (this.rainDrops) {
+          this.rainDrops.forEach((rain) => rain.destroy());
+        }
+
+        const spacingX = RAIN_SETTINGS.spacing;
+        const spacingY = RAIN_SETTINGS.spacing;
+        const rows = Math.ceil((GAME_HEIGHT + RAIN_MARGIN * 2) / spacingY) + 1;
+        const columns = Math.ceil((GAME_WIDTH + RAIN_MARGIN * 2) / spacingX) + 2;
 
         this.rainDrops = [];
-        this.rainLoopHeight = rows * RAIN_SPACING_Y;
-        this.rainLoopWidth = columns * RAIN_SPACING_X;
-        this.rainLoopDrift = this.rainLoopHeight * (RAIN_SPEED_X / RAIN_SPEED_Y);
+        this.rainLoopHeight = rows * spacingY;
+        this.rainLoopWidth = columns * spacingX;
 
         for (let row = 0; row < rows; row += 1) {
           for (let column = 0; column < columns; column += 1) {
             const rain = this.add.image(
-              -RAIN_MARGIN + column * RAIN_SPACING_X,
-              -RAIN_MARGIN + row * RAIN_SPACING_Y,
+              -RAIN_MARGIN + column * spacingX,
+              -RAIN_MARGIN + row * spacingY,
               'rain'
             );
 
             rain
               .setDepth(30)
-              .setAngle(RAIN_ANGLE)
+              .setAngle(RAIN_SETTINGS.imageAngle)
               .setAlpha(0.9);
 
             this.rainDrops.push(rain);
@@ -225,10 +320,27 @@
         }
       }
 
+      applyRainSettings() {
+        if (!this.rainDrops) {
+          return;
+        }
+
+        this.rainDrops.forEach((rain) => {
+          rain.setAngle(RAIN_SETTINGS.imageAngle);
+        });
+
+        if (RAIN_SETTINGS.spacing !== RAIN_SETTINGS.lastSpacing) {
+          RAIN_SETTINGS.lastSpacing = RAIN_SETTINGS.spacing;
+          this.addRain();
+        }
+      }
+
       updateRain(delta) {
         const seconds = delta / 1000;
-        const moveX = RAIN_SPEED_X * seconds;
-        const moveY = RAIN_SPEED_Y * seconds;
+        const fallAngleRadians = Phaser.Math.DegToRad(RAIN_SETTINGS.fallAngle);
+        const moveX = Math.sin(fallAngleRadians) * RAIN_SETTINGS.fallSpeed * seconds;
+        const moveY = Math.cos(fallAngleRadians) * RAIN_SETTINGS.fallSpeed * seconds;
+        const loopDrift = this.rainLoopHeight * Math.tan(fallAngleRadians);
 
         this.rainDrops.forEach((rain) => {
           rain.x += moveX;
@@ -236,7 +348,7 @@
 
           if (rain.y > GAME_HEIGHT + RAIN_MARGIN) {
             rain.y -= this.rainLoopHeight;
-            rain.x -= this.rainLoopDrift;
+            rain.x -= loopDrift;
           }
 
           if (rain.x > GAME_WIDTH + RAIN_MARGIN) {
@@ -343,6 +455,7 @@
       }
 
       create() {
+        window.transitionScene = this;
         this.cameras.main.setBackgroundColor('#090909');
         this.activeWaves = [];
 
@@ -378,7 +491,9 @@
       }
 
       update(time, delta) {
-        this.updateRain(delta);
+        if (this.rainDrops) {
+          this.updateRain(delta);
+        }
       }
     }
 
