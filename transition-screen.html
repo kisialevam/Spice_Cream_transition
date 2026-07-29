@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v0.4</div>
+  <div id="version">v0.6</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -67,6 +67,7 @@
     const BAT_SHEET = 'bat.png';
     const LIGHT_IMAGES = ['light-1', 'light-2'];
     const LIGHT_SCALE = 0.65;
+    const WAVE_IMAGES = ['wave-1', 'wave-2', 'wave-3', 'wave-4', 'wave-5'];
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
@@ -97,6 +98,11 @@
         this.load.image('transition-group', GROUP_IMAGE);
         this.load.image('light-1', 'light_1.png');
         this.load.image('light-2', 'light_2.png');
+        this.load.image('wave-1', 'wave_1.png');
+        this.load.image('wave-2', 'wave_2.png');
+        this.load.image('wave-3', 'wave_3.png');
+        this.load.image('wave-4', 'wave_4.png');
+        this.load.image('wave-5', 'wave_5.png');
         this.load.spritesheet('bat', BAT_SHEET, {
           frameWidth: BAT_FRAME.width,
           frameHeight: BAT_FRAME.height
@@ -176,6 +182,62 @@
         });
       }
 
+      animateWave(wave) {
+        this.tweens.add({
+          targets: wave,
+          scaleX: 0,
+          duration: Phaser.Math.Between(850, 1700),
+          ease: 'Sine.easeInOut',
+          onComplete: () => {
+            const nextScaleX = Phaser.Math.FloatBetween(0.38, 1);
+            wave.x = Phaser.Math.Between(430, 650);
+
+            this.tweens.add({
+              targets: wave,
+              scaleX: nextScaleX,
+              duration: Phaser.Math.Between(850, 1900),
+              ease: 'Sine.easeInOut',
+              onComplete: () => {
+                this.time.delayedCall(
+                  Phaser.Math.Between(250, 1100),
+                  () => this.animateWave(wave)
+                );
+              }
+            });
+          },
+        });
+      }
+
+      addWaves() {
+        const baseYPositions = [1130, 1285, 1445, 1620, 1810];
+        const shuffledYPositions = Phaser.Utils.Array.Shuffle(baseYPositions.slice());
+
+        WAVE_IMAGES.forEach((textureKey, index) => {
+          const startScaleX = Phaser.Math.FloatBetween(0.42, 1);
+          const wave = this.add.image(
+            Phaser.Math.Between(430, 650),
+            shuffledYPositions[index] + Phaser.Math.Between(-34, 34),
+            textureKey
+          );
+
+          wave
+            .setDepth(8)
+            .setAlpha(0.9)
+            .setScale(startScaleX, 1);
+
+          this.tweens.add({
+            targets: wave,
+            y: wave.y + Phaser.Math.Between(-18, 18),
+            duration: Phaser.Math.Between(1800, 3600),
+            ease: 'Sine.easeInOut',
+            yoyo: true,
+            repeat: -1
+          });
+
+          this.time.delayedCall(index * 220, () => this.animateWave(wave));
+        });
+      }
+
       create() {
         this.cameras.main.setBackgroundColor('#090909');
 
@@ -188,7 +250,10 @@
           repeat: -1
         });
 
-        this.add.image(GROUP_POSITION.x, GROUP_POSITION.y, 'transition-group');
+        this.add.image(GROUP_POSITION.x, GROUP_POSITION.y, 'transition-group')
+          .setDepth(5);
+
+        this.addWaves();
 
         for (let index = 0; index < BAT_COUNT; index += 1) {
           this.addBat(index);
