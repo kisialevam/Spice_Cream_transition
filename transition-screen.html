@@ -53,7 +53,7 @@
     const TRANSITION_IMAGE = 'Frame%20225287.png';
     const GROUP_IMAGE = 'Group%20230792.png';
     const BAT_SHEET = 'bat.png';
-    const BAT_POSITION = { x: 540, y: 820 };
+    const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
@@ -87,6 +87,39 @@
         });
       }
 
+      moveBat(bat) {
+        const targetX = Phaser.Math.Between(-80, GAME_WIDTH + 80);
+        const targetY = Phaser.Math.Between(180, GAME_HEIGHT - 180);
+        const duration = Phaser.Math.Between(1500, 4200);
+
+        bat.setFlipX(targetX < bat.x);
+
+        this.tweens.add({
+          targets: bat,
+          x: targetX,
+          y: targetY,
+          rotation: Phaser.Math.FloatBetween(-0.18, 0.18),
+          duration,
+          ease: 'Sine.easeInOut',
+          onComplete: () => this.moveBat(bat)
+        });
+      }
+
+      addBat(index) {
+        const bat = this.add.sprite(
+          Phaser.Math.Between(80, GAME_WIDTH - 80),
+          Phaser.Math.Between(240, GAME_HEIGHT - 240),
+          'bat'
+        );
+
+        bat
+          .setDepth(10)
+          .setScale(Phaser.Math.FloatBetween(0.78, 1.18))
+          .play('bat-flap');
+
+        this.time.delayedCall(index * 180, () => this.moveBat(bat));
+      }
+
       create() {
         this.cameras.main.setBackgroundColor('#090909');
 
@@ -99,10 +132,11 @@
           repeat: -1
         });
 
-        this.add.sprite(BAT_POSITION.x, BAT_POSITION.y, 'bat')
-          .play('bat-flap');
-
         this.add.image(GROUP_POSITION.x, GROUP_POSITION.y, 'transition-group');
+
+        for (let index = 0; index < BAT_COUNT; index += 1) {
+          this.addBat(index);
+        }
       }
     }
 
