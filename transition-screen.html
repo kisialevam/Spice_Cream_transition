@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v1.1</div>
+  <div id="version">v1.2</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -220,7 +220,7 @@
 
         wave
           .setOrigin(0.5, 1)
-          .setDepth(8)
+          .setDepth(6 + startY / GAME_HEIGHT)
           .setAlpha(0.9)
           .setScale(1, 0);
 
@@ -228,15 +228,17 @@
 
         const growDuration = Phaser.Math.Between(260, 480) / WAVE_SETTINGS.growSpeed;
         const shrinkDuration = Phaser.Math.Between(340, 680) / WAVE_SETTINGS.shrinkSpeed;
-        const driftDuration = (growDuration + shrinkDuration) * Phaser.Math.FloatBetween(1.4, 2.2);
-        const visibleDuration = driftDuration - shrinkDuration;
+        const driftDuration = growDuration + shrinkDuration;
 
         this.tweens.add({
           targets: wave,
           x: endX,
           y: startY + Phaser.Math.Between(-18, 18),
           duration: driftDuration,
-          ease: 'Linear'
+          ease: 'Linear',
+          onUpdate: () => {
+            wave.setDepth(6 + wave.y / GAME_HEIGHT);
+          }
         });
 
         this.tweens.add({
@@ -245,17 +247,15 @@
           duration: growDuration,
           ease: 'Cubic.easeOut',
           onComplete: () => {
-            this.time.delayedCall(Math.max(0, visibleDuration - growDuration), () => {
-              this.tweens.add({
-                targets: wave,
-                scaleY: 0,
-                duration: shrinkDuration,
-                ease: 'Cubic.easeIn',
-                onComplete: () => {
-                  this.activeWaves = this.activeWaves.filter((item) => item !== wave);
-                  wave.destroy();
-                }
-              });
+            this.tweens.add({
+              targets: wave,
+              scaleY: 0,
+              duration: shrinkDuration,
+              ease: 'Cubic.easeIn',
+              onComplete: () => {
+                this.activeWaves = this.activeWaves.filter((item) => item !== wave);
+                wave.destroy();
+              }
             });
           }
         });
