@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v2.9</div>
+  <div id="version">v3.0</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -80,7 +80,7 @@
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
-    const GROUP_FLOAT_X = 34;
+    const GROUP_FLOAT_X = 58;
     const RAIN_SETTINGS = {
       imageAngle: -30,
       fallSpeed: 2200,
@@ -393,8 +393,8 @@
         this.tweens.add({
           targets: group,
           x: GROUP_POSITION.x + GROUP_FLOAT_X,
-          duration: 1800,
-          ease: 'Sine.easeInOut',
+          duration: 1150,
+          ease: 'Quad.easeInOut',
           yoyo: true,
           repeat: -1
         });
