@@ -27,17 +27,42 @@
     canvas {
       display: block;
     }
+
+    #status {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 32px;
+      box-sizing: border-box;
+      color: #ffffff;
+      font: 24px Arial, sans-serif;
+      text-align: center;
+      background: #090909;
+    }
   </style>
 </head>
 <body>
   <div id="game"></div>
+  <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
   <script>
     const GAME_WIDTH = 1080;
     const GAME_HEIGHT = 2048;
-    const TRANSITION_IMAGE = 'Frame 225287.png';
-    const GROUP_IMAGE = 'Group 230792.png';
+    const TRANSITION_IMAGE = 'Frame%20225287.png';
+    const GROUP_IMAGE = 'Group%20230792.png';
+    const status = document.getElementById('status');
+
+    function showStatus(message) {
+      status.textContent = message;
+      status.style.display = 'grid';
+    }
+
+    if (!window.Phaser) {
+      showStatus('Phaser did not load. Check your internet connection or CDN access.');
+      throw new Error('Phaser did not load.');
+    }
 
     class TransitionScene extends Phaser.Scene {
       constructor() {
@@ -45,6 +70,10 @@
       }
 
       preload() {
+        this.load.on('loaderror', (file) => {
+          showStatus(`Could not load asset: ${file.src}`);
+        });
+
         this.load.image('transition-frame', TRANSITION_IMAGE);
         this.load.image('transition-group', GROUP_IMAGE);
       }
