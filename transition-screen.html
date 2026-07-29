@@ -109,7 +109,7 @@
       <span id="rainSpacingValue">160</span>
     </div>
   </div>
-  <div id="version">v2.6</div>
+  <div id="version">v2.7</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -353,8 +353,12 @@
             rain.x -= loopDrift;
           }
 
-          if (rain.x > GAME_WIDTH + RAIN_MARGIN) {
+          while (rain.x > GAME_WIDTH + RAIN_MARGIN) {
             rain.x -= this.rainLoopWidth;
+          }
+
+          while (rain.x < -RAIN_MARGIN) {
+            rain.x += this.rainLoopWidth;
           }
         });
       }
