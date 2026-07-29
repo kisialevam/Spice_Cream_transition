@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v1.5</div>
+  <div id="version">v1.6</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -223,7 +223,8 @@
         wave
           .setOrigin(0.5, 1)
           .setDepth(6 + startY / GAME_HEIGHT)
-          .setAlpha(0.9)
+          .setAlpha(1)
+          .setBlendMode(Phaser.BlendModes.NORMAL)
           .setScale(1, 0);
 
         this.activeWaves.push(wave);
