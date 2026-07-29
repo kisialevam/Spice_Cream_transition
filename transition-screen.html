@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v1.9</div>
+  <div id="version">v2.0</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -210,7 +210,6 @@
           return;
         }
 
-        const textureKey = Phaser.Utils.Array.GetRandom(WAVE_IMAGES);
         const direction = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
         const startX = Phaser.Math.Between(430, 650);
         const driftSpeedVariant = Phaser.Math.FloatBetween(0.45, 1.25);
@@ -218,6 +217,10 @@
           Phaser.Math.Between(150, 360) * WAVE_SETTINGS.moveSpeed * driftSpeedVariant;
         const endX = startX + direction * driftDistance;
         const startY = this.getWaveSpawnY();
+        const availableWaves = startY >= 1450
+          ? WAVE_IMAGES
+          : WAVE_IMAGES.filter((textureKey) => textureKey !== 'wave-1');
+        const textureKey = Phaser.Utils.Array.GetRandom(availableWaves);
         const perspectiveScale = Phaser.Math.Linear(
           0.42,
           1,
