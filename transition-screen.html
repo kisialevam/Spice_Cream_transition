@@ -28,6 +28,54 @@
       display: block;
     }
 
+    #controls {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      z-index: 2;
+      width: min(360px, calc(100vw - 32px));
+      padding: 16px;
+      box-sizing: border-box;
+      color: #ffffff;
+      background: rgba(12, 12, 12, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      font: 14px Arial, sans-serif;
+      backdrop-filter: blur(8px);
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 24px 1fr 58px;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    #copyPosition {
+      width: 100%;
+      min-height: 36px;
+      color: #111111;
+      background: #ffffff;
+      border: 0;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #positionOutput {
+      margin-top: 10px;
+      color: rgba(255, 255, 255, 0.82);
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
     #status {
       position: fixed;
       inset: 0;
@@ -44,6 +92,20 @@
 </head>
 <body>
   <div id="game"></div>
+  <div id="controls">
+    <div class="control-row">
+      <label for="groupX">X</label>
+      <input id="groupX" type="range" min="-1200" max="2300" value="540">
+      <span id="groupXValue">540</span>
+    </div>
+    <div class="control-row">
+      <label for="groupY">Y</label>
+      <input id="groupY" type="range" min="-600" max="2650" value="1024">
+      <span id="groupYValue">1024</span>
+    </div>
+    <button id="copyPosition" type="button">Copy position</button>
+    <div id="positionOutput">group.setPosition(540, 1024);</div>
+  </div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -53,11 +115,52 @@
     const TRANSITION_IMAGE = 'Frame%20225287.png';
     const GROUP_IMAGE = 'Group%20230792.png';
     const status = document.getElementById('status');
+    const groupX = document.getElementById('groupX');
+    const groupY = document.getElementById('groupY');
+    const groupXValue = document.getElementById('groupXValue');
+    const groupYValue = document.getElementById('groupYValue');
+    const copyPosition = document.getElementById('copyPosition');
+    const positionOutput = document.getElementById('positionOutput');
+    let groupImage = null;
 
     function showStatus(message) {
       status.textContent = message;
       status.style.display = 'grid';
     }
+
+    function getGroupPositionText() {
+      return `group.setPosition(${groupX.value}, ${groupY.value});`;
+    }
+
+    function updateGroupPosition() {
+      groupXValue.textContent = groupX.value;
+      groupYValue.textContent = groupY.value;
+      positionOutput.textContent = getGroupPositionText();
+
+      if (groupImage) {
+        groupImage.setPosition(Number(groupX.value), Number(groupY.value));
+      }
+    }
+
+    groupX.addEventListener('input', updateGroupPosition);
+    groupY.addEventListener('input', updateGroupPosition);
+    copyPosition.addEventListener('click', async () => {
+      const positionText = getGroupPositionText();
+      positionOutput.textContent = positionText;
+
+      try {
+        await navigator.clipboard.writeText(positionText);
+        copyPosition.textContent = 'Copied';
+        window.setTimeout(() => {
+          copyPosition.textContent = 'Copy position';
+        }, 900);
+      } catch (error) {
+        copyPosition.textContent = 'Select text below';
+        window.setTimeout(() => {
+          copyPosition.textContent = 'Copy position';
+        }, 1400);
+      }
+    });
 
     if (!window.Phaser) {
       showStatus('Phaser did not load. Check your internet connection or CDN access.');
@@ -83,8 +186,8 @@
 
         this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'transition-frame');
 
-        const group = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'transition-group');
-        group.setScale(GAME_WIDTH / group.width);
+        groupImage = this.add.image(Number(groupX.value), Number(groupY.value), 'transition-group');
+        updateGroupPosition();
       }
     }
 
