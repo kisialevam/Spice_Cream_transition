@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v1.3</div>
+  <div id="version">v1.5</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -213,7 +213,9 @@
         const textureKey = Phaser.Utils.Array.GetRandom(WAVE_IMAGES);
         const direction = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
         const startX = Phaser.Math.Between(430, 650);
-        const driftDistance = Phaser.Math.Between(150, 360) * WAVE_SETTINGS.moveSpeed;
+        const driftSpeedVariant = Phaser.Math.FloatBetween(0.45, 1.25);
+        const driftDistance =
+          Phaser.Math.Between(150, 360) * WAVE_SETTINGS.moveSpeed * driftSpeedVariant;
         const endX = startX + direction * driftDistance;
         const startY = this.getWaveSpawnY();
         const wave = this.add.image(startX, startY, textureKey);
@@ -226,7 +228,10 @@
 
         this.activeWaves.push(wave);
 
-        const growDuration = Phaser.Math.Between(260, 480) / WAVE_SETTINGS.growSpeed;
+        const targetScaleY = Phaser.Math.FloatBetween(0.35, 1);
+        const largeWaveSlowdown = Phaser.Math.Linear(1, 1.65, targetScaleY);
+        const growDuration =
+          (Phaser.Math.Between(260, 480) * largeWaveSlowdown) / WAVE_SETTINGS.growSpeed;
         const shrinkDuration = Phaser.Math.Between(340, 680) / WAVE_SETTINGS.shrinkSpeed;
         const driftDuration = growDuration + shrinkDuration;
 
@@ -243,7 +248,7 @@
 
         this.tweens.add({
           targets: wave,
-          scaleY: Phaser.Math.FloatBetween(0.35, 1),
+          scaleY: targetScaleY,
           duration: growDuration,
           ease: 'Cubic.easeOut',
           onComplete: () => {
