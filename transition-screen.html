@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v2.1</div>
+  <div id="version">v2.2</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -212,11 +212,16 @@
 
         const direction = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
         const startX = Phaser.Math.Between(430, 650);
-        const driftSpeedVariant = Phaser.Math.FloatBetween(0.45, 1.25);
-        const driftDistance =
-          Phaser.Math.Between(150, 360) * WAVE_SETTINGS.moveSpeed * driftSpeedVariant;
-        const endX = startX + direction * driftDistance;
         const startY = this.getWaveSpawnY();
+        const driftSpeedVariant = Phaser.Math.FloatBetween(0.45, 1.25);
+        const perspectiveProgress = Phaser.Math.Clamp((startY - 860) / (GAME_HEIGHT - 860), 0, 1);
+        const perspectiveDriftSpeed = Phaser.Math.Linear(0.35, 1, perspectiveProgress);
+        const driftDistance =
+          Phaser.Math.Between(150, 360) *
+          WAVE_SETTINGS.moveSpeed *
+          driftSpeedVariant *
+          perspectiveDriftSpeed;
+        const endX = startX + direction * driftDistance;
         const availableWaves = startY >= 1450
           ? WAVE_IMAGES
           : WAVE_IMAGES.filter((textureKey) => textureKey !== 'wave-1');
@@ -224,7 +229,7 @@
         const perspectiveScale = Phaser.Math.Linear(
           0.42,
           1,
-          Phaser.Math.Clamp((startY - 860) / (GAME_HEIGHT - 860), 0, 1)
+          perspectiveProgress
         );
         const wave = this.add.image(startX, startY, textureKey);
 
