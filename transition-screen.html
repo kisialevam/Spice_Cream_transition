@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v4.0</div>
+  <div id="version">v4.1</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -143,9 +143,17 @@
       }
 
       moveBat(bat) {
-        const targetX = Phaser.Math.Between(-80, GAME_WIDTH + 80);
-        const targetY = Phaser.Math.Between(180, GAME_HEIGHT - 180);
-        const duration = Phaser.Math.Between(1500, 4200);
+        const targetX = Phaser.Math.Clamp(
+          bat.x + Phaser.Math.Between(-260, 260),
+          -80,
+          GAME_WIDTH + 80
+        );
+        const targetY = Phaser.Math.Clamp(
+          bat.y + Phaser.Math.Between(-160, 160),
+          120,
+          820
+        );
+        const duration = Phaser.Math.Between(3200, 6200);
 
         bat.setFlipX(targetX < bat.x);
 
@@ -155,7 +163,7 @@
           y: targetY,
           rotation: Phaser.Math.FloatBetween(-0.18, 0.18),
           duration,
-          ease: 'Sine.easeInOut',
+          ease: 'Cubic.easeInOut',
           onComplete: () => this.moveBat(bat)
         });
       }
@@ -163,7 +171,7 @@
       addBat(index) {
         const bat = this.add.sprite(
           Phaser.Math.Between(80, GAME_WIDTH - 80),
-          Phaser.Math.Between(240, GAME_HEIGHT - 240),
+          Phaser.Math.Between(160, 780),
           'bat'
         );
 
