@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v4.3</div>
+  <div id="version">v4.4</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -82,7 +82,7 @@
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
-    const BAT_SCALE_MULTIPLIER = 0.8;
+    const BAT_SCALE = 0.78;
     const BAT_MIN_DISTANCE = 230;
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 58;
@@ -165,7 +165,7 @@
         for (let attempt = 0; attempt < 18; attempt += 1) {
           const target = {
             x: Phaser.Math.Clamp(currentBat.x + Phaser.Math.Between(-260, 260), -80, GAME_WIDTH + 80),
-            y: Phaser.Math.Clamp(currentBat.y + Phaser.Math.Between(-160, 160), 120, 820)
+            y: Phaser.Math.Clamp(currentBat.y + Phaser.Math.Between(-140, 140), 80, 640)
           };
           const hasSpace = this.bats.every((bat) => {
             return bat === currentBat ||
@@ -179,7 +179,7 @@
 
         return {
           x: Phaser.Math.Clamp(currentBat.x + Phaser.Math.Between(-180, 180), -80, GAME_WIDTH + 80),
-          y: Phaser.Math.Clamp(currentBat.y + Phaser.Math.Between(-120, 120), 120, 820)
+          y: Phaser.Math.Clamp(currentBat.y + Phaser.Math.Between(-100, 100), 80, 640)
         };
       }
 
@@ -187,13 +187,13 @@
         const laneWidth = GAME_WIDTH / BAT_COUNT;
         const bat = this.add.sprite(
           Phaser.Math.Between(index * laneWidth + 60, (index + 1) * laneWidth - 60),
-          Phaser.Math.Between(160 + (index % 2) * 120, 520 + (index % 2) * 120),
+          Phaser.Math.Between(95 + (index % 2) * 90, 430 + (index % 2) * 90),
           'bat'
         );
 
         bat
-          .setDepth(10)
-          .setScale(Phaser.Math.FloatBetween(0.78, 1.18) * BAT_SCALE_MULTIPLIER)
+          .setDepth(8.5)
+          .setScale(BAT_SCALE)
           .play('bat-flap');
 
         this.bats.push(bat);
