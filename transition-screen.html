@@ -28,6 +28,38 @@
       display: block;
     }
 
+    #monsterControls {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      z-index: 4;
+      width: min(380px, calc(100vw - 24px));
+      padding: 12px;
+      box-sizing: border-box;
+      color: #ffffff;
+      background: rgba(9, 9, 9, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      font: 13px Arial, sans-serif;
+      backdrop-filter: blur(8px);
+    }
+
+    .sliderRow {
+      display: grid;
+      grid-template-columns: 116px 1fr 54px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .sliderRow:last-child {
+      margin-bottom: 0;
+    }
+
+    .sliderRow input {
+      width: 100%;
+    }
+
     #version {
       position: fixed;
       right: 10px;
@@ -55,7 +87,24 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v3.6</div>
+  <div id="monsterControls">
+    <div class="sliderRow">
+      <label for="monsterWaterline">Waterline</label>
+      <input id="monsterWaterline" type="range" min="-120" max="260" step="1" value="118">
+      <span id="monsterWaterlineValue">118</span>
+    </div>
+    <div class="sliderRow">
+      <label for="monsterScale">Scale</label>
+      <input id="monsterScale" type="range" min="0.45" max="1.25" step="0.005" value="0.845">
+      <span id="monsterScaleValue">0.845</span>
+    </div>
+    <div class="sliderRow">
+      <label for="monsterX">Monster X</label>
+      <input id="monsterX" type="range" min="100" max="980" step="1" value="540">
+      <span id="monsterXValue">540</span>
+    </div>
+  </div>
+  <div id="version">v3.7</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -84,9 +133,12 @@
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 58;
-    const MONSTER_POSITION = { x: 540, y: 1100 };
-    const MONSTER_SCALE = 0.845;
-    const MONSTER_WATERLINE_OFFSET_Y = 118;
+    const MONSTER_SETTINGS = {
+      x: 540,
+      y: 1100,
+      scale: 0.845,
+      waterlineOffsetY: 118
+    };
     const RAIN_SETTINGS = {
       imageAngle: -30,
       fallSpeed: 2200,
@@ -97,11 +149,41 @@
     };
     const RAIN_MARGIN = 260;
     const status = document.getElementById('status');
+    const monsterControls = {
+      waterline: document.getElementById('monsterWaterline'),
+      scale: document.getElementById('monsterScale'),
+      x: document.getElementById('monsterX'),
+      waterlineValue: document.getElementById('monsterWaterlineValue'),
+      scaleValue: document.getElementById('monsterScaleValue'),
+      xValue: document.getElementById('monsterXValue')
+    };
 
     function showStatus(message) {
       status.textContent = message;
       status.style.display = 'grid';
     }
+
+    function updateMonsterSettings() {
+      MONSTER_SETTINGS.waterlineOffsetY = Number(monsterControls.waterline.value);
+      MONSTER_SETTINGS.scale = Number(monsterControls.scale.value);
+      MONSTER_SETTINGS.x = Number(monsterControls.x.value);
+
+      monsterControls.waterlineValue.textContent = String(MONSTER_SETTINGS.waterlineOffsetY);
+      monsterControls.scaleValue.textContent = MONSTER_SETTINGS.scale.toFixed(3);
+      monsterControls.xValue.textContent = String(MONSTER_SETTINGS.x);
+
+      if (window.transitionScene) {
+        window.transitionScene.updateMonster();
+      }
+    }
+
+    Object.values(monsterControls).forEach((control) => {
+      if (control.tagName === 'INPUT') {
+        control.addEventListener('input', updateMonsterSettings);
+      }
+    });
+
+    updateMonsterSettings();
 
     if (!window.Phaser) {
       showStatus('Phaser did not load. Check your internet connection or CDN access.');
@@ -399,20 +481,41 @@
       }
 
       addMonster() {
-        const monster = this.add.image(MONSTER_POSITION.x, MONSTER_POSITION.y, 'monster')
+        this.monsterMaskGraphics = this.make.graphics({ add: false });
+        this.monsterMask = this.monsterMaskGraphics.createGeometryMask();
+        this.monster = this.add.image(MONSTER_SETTINGS.x, MONSTER_SETTINGS.y, 'monster')
           .setDepth(9)
-          .setScale(MONSTER_SCALE);
-        const monsterTop = monster.y - monster.displayHeight / 2;
-        const monsterLeft = monster.x - monster.displayWidth / 2;
-        const waterlineY = monsterTop + monster.displayHeight / 2 + MONSTER_WATERLINE_OFFSET_Y;
-        const maskGraphics = this.make.graphics({ add: false });
-
-        maskGraphics.fillStyle(0xffffff);
-        maskGraphics.fillRect(monsterLeft, monsterTop, monster.displayWidth, waterlineY - monsterTop);
-        monster.setMask(maskGraphics.createGeometryMask());
-
-        this.add.image(MONSTER_POSITION.x, waterlineY, 'water-mask')
+          .setMask(this.monsterMask);
+        this.monsterWater = this.add.image(MONSTER_SETTINGS.x, MONSTER_SETTINGS.y, 'water-mask')
           .setDepth(9.5);
+
+        this.updateMonster();
+      }
+
+      updateMonster() {
+        if (!this.monster || !this.monsterWater || !this.monsterMaskGraphics) {
+          return;
+        }
+
+        this.monster
+          .setPosition(MONSTER_SETTINGS.x, MONSTER_SETTINGS.y)
+          .setScale(MONSTER_SETTINGS.scale);
+
+        const monsterTop = this.monster.y - this.monster.displayHeight / 2;
+        const monsterLeft = this.monster.x - this.monster.displayWidth / 2;
+        const waterlineY =
+          monsterTop + this.monster.displayHeight / 2 + MONSTER_SETTINGS.waterlineOffsetY;
+
+        this.monsterMaskGraphics.clear();
+        this.monsterMaskGraphics.fillStyle(0xffffff);
+        this.monsterMaskGraphics.fillRect(
+          monsterLeft,
+          monsterTop,
+          this.monster.displayWidth,
+          waterlineY - monsterTop
+        );
+
+        this.monsterWater.setPosition(MONSTER_SETTINGS.x, waterlineY);
       }
 
       create() {
