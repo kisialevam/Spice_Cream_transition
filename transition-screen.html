@@ -99,12 +99,12 @@
       <span id="monsterScaleValue">0.845</span>
     </div>
     <div class="sliderRow">
-      <label for="monsterX">Monster X</label>
-      <input id="monsterX" type="range" min="100" max="980" step="1" value="540">
-      <span id="monsterXValue">540</span>
+      <label for="monsterY">Monster Y</label>
+      <input id="monsterY" type="range" min="760" max="1420" step="1" value="1100">
+      <span id="monsterYValue">1100</span>
     </div>
   </div>
-  <div id="version">v3.7</div>
+  <div id="version">v3.8</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -152,10 +152,10 @@
     const monsterControls = {
       waterline: document.getElementById('monsterWaterline'),
       scale: document.getElementById('monsterScale'),
-      x: document.getElementById('monsterX'),
+      y: document.getElementById('monsterY'),
       waterlineValue: document.getElementById('monsterWaterlineValue'),
       scaleValue: document.getElementById('monsterScaleValue'),
-      xValue: document.getElementById('monsterXValue')
+      yValue: document.getElementById('monsterYValue')
     };
 
     function showStatus(message) {
@@ -166,11 +166,11 @@
     function updateMonsterSettings() {
       MONSTER_SETTINGS.waterlineOffsetY = Number(monsterControls.waterline.value);
       MONSTER_SETTINGS.scale = Number(monsterControls.scale.value);
-      MONSTER_SETTINGS.x = Number(monsterControls.x.value);
+      MONSTER_SETTINGS.y = Number(monsterControls.y.value);
 
       monsterControls.waterlineValue.textContent = String(MONSTER_SETTINGS.waterlineOffsetY);
       monsterControls.scaleValue.textContent = MONSTER_SETTINGS.scale.toFixed(3);
-      monsterControls.xValue.textContent = String(MONSTER_SETTINGS.x);
+      monsterControls.yValue.textContent = String(MONSTER_SETTINGS.y);
 
       if (window.transitionScene) {
         window.transitionScene.updateMonster();
@@ -515,7 +515,9 @@
           waterlineY - monsterTop
         );
 
-        this.monsterWater.setPosition(MONSTER_SETTINGS.x, waterlineY);
+        this.monsterWater
+          .setPosition(MONSTER_SETTINGS.x, waterlineY)
+          .setScale(MONSTER_SETTINGS.scale);
       }
 
       create() {
