@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v3.4</div>
+  <div id="version">v3.5</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -85,7 +85,8 @@
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 58;
     const MONSTER_POSITION = { x: 540, y: 1100 };
-    const MONSTER_SCALE = 0.7;
+    const MONSTER_SCALE = 0.805;
+    const MONSTER_WATERLINE_OFFSET_Y = 82;
     const RAIN_SETTINGS = {
       imageAngle: -30,
       fallSpeed: 2200,
@@ -403,13 +404,14 @@
           .setScale(MONSTER_SCALE);
         const monsterTop = monster.y - monster.displayHeight / 2;
         const monsterLeft = monster.x - monster.displayWidth / 2;
+        const waterlineY = monsterTop + monster.displayHeight / 2 + MONSTER_WATERLINE_OFFSET_Y;
         const maskGraphics = this.make.graphics({ add: false });
 
         maskGraphics.fillStyle(0xffffff);
-        maskGraphics.fillRect(monsterLeft, monsterTop, monster.displayWidth, monster.displayHeight / 2);
+        maskGraphics.fillRect(monsterLeft, monsterTop, monster.displayWidth, waterlineY - monsterTop);
         monster.setMask(maskGraphics.createGeometryMask());
 
-        this.add.image(MONSTER_POSITION.x, MONSTER_POSITION.y, 'water-mask')
+        this.add.image(MONSTER_POSITION.x, waterlineY, 'water-mask')
           .setDepth(9.5);
       }
 
