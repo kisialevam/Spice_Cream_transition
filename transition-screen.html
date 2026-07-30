@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v4.1</div>
+  <div id="version">v4.2</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -82,6 +82,7 @@
     const BAT_COUNT = 5;
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
+    const BAT_SCALE_MULTIPLIER = 0.8;
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 58;
     const MONSTER_SETTINGS = {
@@ -177,7 +178,7 @@
 
         bat
           .setDepth(10)
-          .setScale(Phaser.Math.FloatBetween(0.78, 1.18))
+          .setScale(Phaser.Math.FloatBetween(0.78, 1.18) * BAT_SCALE_MULTIPLIER)
           .play('bat-flap');
 
         this.time.delayedCall(index * 180, () => this.moveBat(bat));
