@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v3.2</div>
+  <div id="version">v3.3</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -64,6 +64,8 @@
     const GAME_HEIGHT = 2048;
     const TRANSITION_IMAGE = 'Frame%20225287.png';
     const GROUP_IMAGE = 'Group%20230792.png';
+    const MONSTER_IMAGE = 'Krak.png';
+    const WATER_MASK_IMAGE = 'wat.png';
     const BAT_SHEET = 'bat.png';
     const RAIN_IMAGE = 'rain.png';
     const LIGHT_FLASH_IMAGE = 'Rectangle.png';
@@ -82,6 +84,7 @@
     const BAT_FPS = 10;
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 58;
+    const MONSTER_POSITION = { x: 540, y: 1024 };
     const RAIN_SETTINGS = {
       imageAngle: -30,
       fallSpeed: 2200,
@@ -115,6 +118,8 @@
 
         this.load.image('transition-frame', TRANSITION_IMAGE);
         this.load.image('transition-group', GROUP_IMAGE);
+        this.load.image('monster', MONSTER_IMAGE);
+        this.load.image('water-mask', WATER_MASK_IMAGE);
         this.load.image('rain', RAIN_IMAGE);
         this.load.image('light-flash', LIGHT_FLASH_IMAGE);
         this.load.image('light-1', 'light_1.png');
@@ -391,6 +396,21 @@
         });
       }
 
+      addMonster() {
+        const monster = this.add.image(MONSTER_POSITION.x, MONSTER_POSITION.y, 'monster')
+          .setDepth(9);
+        const monsterTop = monster.y - monster.height / 2;
+        const monsterLeft = monster.x - monster.width / 2;
+        const maskGraphics = this.make.graphics({ add: false });
+
+        maskGraphics.fillStyle(0xffffff);
+        maskGraphics.fillRect(monsterLeft, monsterTop, monster.width, monster.height / 2);
+        monster.setMask(maskGraphics.createGeometryMask());
+
+        this.add.image(MONSTER_POSITION.x, MONSTER_POSITION.y, 'water-mask')
+          .setDepth(9.5);
+      }
+
       create() {
         window.transitionScene = this;
         this.cameras.main.setBackgroundColor('#090909');
@@ -423,6 +443,7 @@
         });
 
         this.scheduleWaveSpawn();
+        this.addMonster();
 
         for (let index = 0; index < BAT_COUNT; index += 1) {
           this.addBat(index);
