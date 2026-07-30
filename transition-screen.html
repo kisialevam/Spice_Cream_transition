@@ -55,7 +55,7 @@
 </head>
 <body>
   <div id="game"></div>
-  <div id="version">v4.2</div>
+  <div id="version">v4.3</div>
   <div id="status"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
@@ -83,6 +83,7 @@
     const BAT_FRAME = { width: 194, height: 136 };
     const BAT_FPS = 10;
     const BAT_SCALE_MULTIPLIER = 0.8;
+    const BAT_MIN_DISTANCE = 230;
     const GROUP_POSITION = { x: 540, y: 1282 };
     const GROUP_FLOAT_X = 58;
     const MONSTER_SETTINGS = {
@@ -144,24 +145,15 @@
       }
 
       moveBat(bat) {
-        const targetX = Phaser.Math.Clamp(
-          bat.x + Phaser.Math.Between(-260, 260),
-          -80,
-          GAME_WIDTH + 80
-        );
-        const targetY = Phaser.Math.Clamp(
-          bat.y + Phaser.Math.Between(-160, 160),
-          120,
-          820
-        );
+        const target = this.getBatTarget(bat);
         const duration = Phaser.Math.Between(3200, 6200);
 
-        bat.setFlipX(targetX < bat.x);
+        bat.setFlipX(target.x < bat.x);
 
         this.tweens.add({
           targets: bat,
-          x: targetX,
-          y: targetY,
+          x: target.x,
+          y: target.y,
           rotation: Phaser.Math.FloatBetween(-0.18, 0.18),
           duration,
           ease: 'Cubic.easeInOut',
@@ -169,10 +161,33 @@
         });
       }
 
+      getBatTarget(currentBat) {
+        for (let attempt = 0; attempt < 18; attempt += 1) {
+          const target = {
+            x: Phaser.Math.Clamp(currentBat.x + Phaser.Math.Between(-260, 260), -80, GAME_WIDTH + 80),
+            y: Phaser.Math.Clamp(currentBat.y + Phaser.Math.Between(-160, 160), 120, 820)
+          };
+          const hasSpace = this.bats.every((bat) => {
+            return bat === currentBat ||
+              Phaser.Math.Distance.Between(target.x, target.y, bat.x, bat.y) >= BAT_MIN_DISTANCE;
+          });
+
+          if (hasSpace) {
+            return target;
+          }
+        }
+
+        return {
+          x: Phaser.Math.Clamp(currentBat.x + Phaser.Math.Between(-180, 180), -80, GAME_WIDTH + 80),
+          y: Phaser.Math.Clamp(currentBat.y + Phaser.Math.Between(-120, 120), 120, 820)
+        };
+      }
+
       addBat(index) {
+        const laneWidth = GAME_WIDTH / BAT_COUNT;
         const bat = this.add.sprite(
-          Phaser.Math.Between(80, GAME_WIDTH - 80),
-          Phaser.Math.Between(160, 780),
+          Phaser.Math.Between(index * laneWidth + 60, (index + 1) * laneWidth - 60),
+          Phaser.Math.Between(160 + (index % 2) * 120, 520 + (index % 2) * 120),
           'bat'
         );
 
@@ -181,6 +196,7 @@
           .setScale(Phaser.Math.FloatBetween(0.78, 1.18) * BAT_SCALE_MULTIPLIER)
           .play('bat-flap');
 
+        this.bats.push(bat);
         this.time.delayedCall(index * 180, () => this.moveBat(bat));
       }
 
@@ -471,6 +487,7 @@
         window.transitionScene = this;
         this.cameras.main.setBackgroundColor('#090909');
         this.activeWaves = [];
+        this.bats = [];
 
         this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'transition-frame');
 
